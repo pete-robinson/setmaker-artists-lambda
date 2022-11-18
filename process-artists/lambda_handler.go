@@ -38,7 +38,8 @@ func handler(ctx context.Context, snsEvent events.SNSEvent) {
 		}).Info("Message Received. Beginning processing")
 
 		msg := []byte(msgStr) 		// str to byte slice
-		bootstrap(ctx, msg)				// kick off the lambda handler
+		_ = bootstrap(ctx, msg)				// kick off the lambda handler
+
 	}
 }
 
@@ -47,7 +48,7 @@ func main() {
 }
 
 // @todo - refactor service creation to outside of the handler record loop - not efficient to build a new service struct for every event in the payload
-func bootstrap(ctx context.Context, msg []byte) {
+func bootstrap(ctx context.Context, msg []byte) error {
 	logger.WithField("msg", string(msg)).Info("Beginning processing for message")
 
 	// unmarshal the message struct
@@ -55,8 +56,8 @@ func bootstrap(ctx context.Context, msg []byte) {
 
 	err := proto.Unmarshal(msg, evt)
 	if err != nil {
-		logger.WithField("msg", string(msg)).Fatalf("bootstrap: Message could not be unmarshaled: %s", err)
-		panic(err)
+		logger.WithField("msg", string(msg)).Errorf("bootstrap: Message could not be unmarshaled: %s", err)
+		return fmt.Errorf("bootstrap: could not unmarshal event: %s", err)
 	}
 
 	logger.WithField("event", evt).Info("Event unmarshaled successfully")
@@ -64,24 +65,26 @@ func bootstrap(ctx context.Context, msg []byte) {
 	switch evt.EventType {
 		case setmakerpb.Event_EVENT_ARTIST_CREATED:
 			logger.Info("Event identified as type EVENT_ARTIST_CREATED")
-			handleArtistCreate(ctx, evt.GetArtistCreated())
+			return handleArtistCreate(ctx, evt.GetArtistCreated())
 
 		case setmakerpb.Event_EVENT_ARTIST_DELETED:
 			logger.Info("Event identified as type EVENT_ARTIST_DELETED")
-			panic("NOT IMPLEMENTED")
+			return fmt.Errorf("bootstrap: UNIMPLEMENTED EVENT TYPE: EVENT_ARTIST_DELETED")
 
 		default:
 			break
 	}
+
+	return nil
 }
 
-func handleArtistCreate(ctx context.Context, msg *setmakerpb.MessageBody_ArtistCreated) {
-	// @todo - create a service bootstrap using functional options to minimise code duplication
-
+// @todo - create a service bootstrap using functional options to minimise code duplication
+func handleArtistCreate(ctx context.Context, msg *setmakerpb.MessageBody_ArtistCreated) error {
 	// init AWS and create dynamo client
 	dynamoClient, err := createDynamoClient(ctx)
 	if err != nil {
-		panic(err)
+		logger.Errorf("handleArtistCreate: could not create dynamo client. Event will not be processed: %s", err)
+		return err
 	}
 
 	// init repo
@@ -90,7 +93,8 @@ func handleArtistCreate(ctx context.Context, msg *setmakerpb.MessageBody_ArtistC
 	// init spotify client
 	spotifyClient, err := createSpotifyClient(ctx)
 	if err != nil {
-		panic(err)
+		logger.Errorf("handleArtistCreate: could not create spotify client. Event will not be processed: %s", err)
+		return err
 	}
 
 	// fetch the relevant information from the event
@@ -101,13 +105,16 @@ func handleArtistCreate(ctx context.Context, msg *setmakerpb.MessageBody_ArtistC
 	s := service.NewService(repo, spotifyClient)
 	ok, err := s.FetchArtistMeta(ctx, id)
 	if err != nil {
-		panic(fmt.Errorf("handleArtistCreate: %s", err))
+		logger.Errorf("handleArtistCreate: FetchArtistMeta failed: %s", err)
+		return err
 	}
 
 	if ok {
 		logger.WithField("id", id).Infof("Artist updated successfully")
+		return nil
 	} else {
-		logger.WithField("id", id).Fatalf("handleArtistCreate: Artist was not updated")
+		logger.WithField("id", id).Errorf("handleArtistCreate: Artist was not updated")
+		return fmt.Errorf("handleArtistCreate: Artist was not updated")
 	}
 }
 

@@ -1,2 +1,9 @@
 # setmaker-artist-meta-lambda
-Lambda to fetch artist meta on creation from Spotify API
+Lambda to perform processing actions on Artist entities (creation/deletion)
+
+## Runbook
+```
+mkdir ./bin
+make
+serverless deploy
+```
