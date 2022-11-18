@@ -10,8 +10,6 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-type SearchType string
-
 const ResultLimit = 5
 
 type SpotifyClient struct {
