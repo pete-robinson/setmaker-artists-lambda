@@ -9,4 +9,5 @@ make deploy
 ```
 ### Dependencies
 [Serverless](https://www.serverless.com/)
+
 [AWS CLI](https://aws.amazon.com/cli/)
