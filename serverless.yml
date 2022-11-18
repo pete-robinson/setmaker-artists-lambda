@@ -1,0 +1,37 @@
+service: process-artists
+
+frameworkVersion: '3'
+useDotenv: true
+provider:
+  name: aws
+  runtime: go1.x
+  stage: prod
+  region: eu-west-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - 'dynamodb:GetItem'
+            - 'dynamodb:PutItem'
+          Resource: ${env:DYNAMODB_ARTISTS}
+
+package:
+  patterns:
+    - ./bin/**
+
+functions:
+  process-artists:
+    name: process-artists
+    handler: bin/process-artists
+    events:
+      - sns:
+          topicName: setmaker-event-stream
+    environment:
+      AWSACCESS_KEY_ID: ${env:AWSACCESS_KEY_ID}
+      AWSREGION: ${env:AWSREGION}
+      AWSSECRET_ACCESS_KEY: ${env:AWSSECRET_ACCESS_KEY}
+      SPOTIFY_CLIENT_ID: ${env:SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${env:SPOTIFY_CLIENT_SECRET}
+      DYNAMODB_ARTISTS: ${env:DYNAMODB_ARTISTS}
+
