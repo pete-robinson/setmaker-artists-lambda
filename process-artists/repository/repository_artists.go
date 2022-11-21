@@ -46,7 +46,7 @@ func (d *DynamoRepository) GetArtist(ctx context.Context, id uuid.UUID) (*setmak
 	logger.WithField("data", data.Item).Info("Artist found")
 
 	// unmarshal response
-	res := &setmakerpb.Artist{}
+	var res *setmakerpb.Artist
 	err = attributevalue.UnmarshalMap(data.Item, res)
 	if err != nil {
 		logger.WithField("data", data.Item).Errorf("GetArtist: Could not unmarshal item: %s", err)

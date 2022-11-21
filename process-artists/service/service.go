@@ -61,8 +61,7 @@ func (s *Service) FetchArtistMeta(ctx context.Context, id string) (bool, error) 
 		logger.WithField("artist", artist).Infof("Artist data set. Attempting persistance")
 
 		// persist artist
-		err = s.repository.PutArtist(ctx, artist)
-		if err != nil {
+		if err = s.repository.PutArtist(ctx, artist); err != nil {
 			return false, err
 		}
 

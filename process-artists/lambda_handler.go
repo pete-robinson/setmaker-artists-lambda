@@ -54,8 +54,7 @@ func bootstrap(ctx context.Context, msg []byte) error {
 	// unmarshal the message struct
 	evt := &setmakerpb.Event{}
 
-	err := proto.Unmarshal(msg, evt)
-	if err != nil {
+	if err := proto.Unmarshal(msg, evt); err != nil {
 		logger.WithField("msg", string(msg)).Errorf("bootstrap: Message could not be unmarshaled: %s", err)
 		return fmt.Errorf("bootstrap: could not unmarshal event: %s", err)
 	}
@@ -98,24 +97,23 @@ func handleArtistCreate(ctx context.Context, msg *setmakerpb.MessageBody_ArtistC
 	}
 
 	// fetch the relevant information from the event
-	id := msg.Id
 	logger.Infof("Fetching artist information for artist: %s", msg.Name)
 
 	// init and call service
 	s := service.NewService(repo, spotifyClient)
-	ok, err := s.FetchArtistMeta(ctx, id)
+	ok, err := s.FetchArtistMeta(ctx, msg.Id)
 	if err != nil {
 		logger.Errorf("handleArtistCreate: FetchArtistMeta failed: %s", err)
 		return err
 	}
 
-	if ok {
-		logger.WithField("id", id).Infof("Artist updated successfully")
-		return nil
-	} else {
-		logger.WithField("id", id).Errorf("handleArtistCreate: Artist was not updated")
+	if !ok {
+		logger.WithField("id", msg.Id).Errorf("handleArtistCreate: Artist was not updated")
 		return fmt.Errorf("handleArtistCreate: Artist was not updated")
 	}
+
+	logger.WithField("id", msg.Id).Infof("Artist updated successfully")
+	return nil
 }
 
 func createDynamoClient(ctx context.Context) (*dynamodb.Client, error) {
