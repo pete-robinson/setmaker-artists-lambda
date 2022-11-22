@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.17.4
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
-	github.com/pete-robinson/setmaker-proto v1.0.2
+	github.com/pete-robinson/setmaker-proto v1.0.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/zmb3/spotify/v2 v2.3.0
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
