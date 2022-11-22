@@ -8,8 +8,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.0
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.10.3
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.17.4
+	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
-	github.com/pete-robinson/setmaker-proto v1.0.1
+	github.com/pete-robinson/setmaker-proto v1.0.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/zmb3/spotify/v2 v2.3.0
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
@@ -30,7 +31,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.17.2 // indirect
 	github.com/aws/smithy-go v1.13.4 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
